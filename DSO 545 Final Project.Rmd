@@ -1,0 +1,57 @@
+---
+title: "Final Project"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+data = read.csv("Public Art Analysis.csv")
+library(ggmap)
+library(ggplot2)
+library(zipcode)
+library(dplyr)
+library(plyr)
+?zipcode
+LA = "Los Angeles County"
+zip = data("zipcode")
+LA_zip = filter(zipcode, state == "CA", city == "Los Angeles")
+
+names(data)[3] <- "zip"
+plyr1 <- join(data, zipcode, by = "zip")
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+LA_map = qmap(LA, zoom = 10, maptype = "roadmap")
+
+LA_map + geom_point(data = plyr1, aes(x = longitude, y =latitude, color = AGENCY), size = 2)
+
+```
+
+### Chart C
+
+```{r}
+
+city_map = group_by(plyr1,city)
+city_map_n = summarise(city_map,n_project_city = n())
+city_map_n <- join(city_map_n, zipcode, by = "city")
+LA_map + geom_point(data = city_map_n, aes(x = longitude, y =latitude, color = city), size = 2)
+```
+
